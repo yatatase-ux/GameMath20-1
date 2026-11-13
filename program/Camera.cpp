@@ -3,6 +3,16 @@
 #include "Camera.h"
 #include "Random.h"
 
+//	プレイヤーから見たカメラの位置（プレイヤーが回転していない時の後ろ上方向）
+#define CAMERA_OFFSET_Y		2.5f
+#define CAMERA_OFFSET_Z		-7.0f
+//	カメラの基本の見下ろし角度（Ｘ軸回転）
+#define CAMERA_BASE_ROT_X	15.0f
+//	プレイヤーのＸ軸角度をカメラにどのくらい反映させるか
+#define CAMERA_ROT_X_RATE	0.5f
+//	プレイヤーのＺ軸角度をカメラにどのくらい反映させるか（マイナスで回転方向を逆に）
+#define CAMERA_ROT_Z_RATE	-0.3f
+
 //---------------------------------------------------------------------------------
 //	初期化処理
 //---------------------------------------------------------------------------------
@@ -16,8 +26,24 @@ void Camera::Init()
 //---------------------------------------------------------------------------------
 //	更新処理
 //---------------------------------------------------------------------------------
-void Camera::Update()
+void Camera::Update( Float3 target_pos, Float3 target_rot )
 {
+	//	課題１：カメラをプレイヤーの後ろに
+	//	回転していない時のプレイヤーから見たカメラの位置（後ろの少し上）
+	Float3 base( 0.0f, CAMERA_OFFSET_Y, CAMERA_OFFSET_Z );
+	//	プレイヤーのＹ軸の向きに合わせて回転させる
+	MATRIX mat_y = MGetRotY( TO_RADIAN( target_rot.y ) );
+	Float3 offset = GetFloat3VTransform( base, mat_y );
+	//	プレイヤー座標からその分ずらした場所をカメラ座標にする
+	m_pos = target_pos + offset;
+
+	//	課題２：プレイヤーの傾きに合わせるようにカメラの回転
+	//	Ｘ軸：基本の見下ろし角度にプレイヤーの上下の向きを少し加える
+	m_rot.x = CAMERA_BASE_ROT_X + target_rot.x * CAMERA_ROT_X_RATE;
+	//	Ｙ軸：プレイヤーと同じ方向を向く
+	m_rot.y = target_rot.y;
+	//	Ｚ軸：プレイヤーの傾きを少し小さくして逆方向に
+	m_rot.z = target_rot.z * CAMERA_ROT_Z_RATE;
 }
 //---------------------------------------------------------------------------------
 //	描画前のカメラ設定
