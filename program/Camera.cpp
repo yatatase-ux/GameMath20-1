@@ -8,8 +8,6 @@
 #define CAMERA_OFFSET_Z		-7.0f
 //	カメラの基本の見下ろし角度（Ｘ軸回転）
 #define CAMERA_BASE_ROT_X	15.0f
-//	プレイヤーのＸ軸角度をカメラにどのくらい反映させるか
-#define CAMERA_ROT_X_RATE	0.5f
 //	プレイヤーのＺ軸角度をカメラにどのくらい反映させるか（マイナスで回転方向を逆に）
 #define CAMERA_ROT_Z_RATE	-0.3f
 
@@ -38,8 +36,8 @@ void Camera::Update( Float3 target_pos, Float3 target_rot )
 	m_pos = target_pos + offset;
 
 	//	課題２：プレイヤーの傾きに合わせるようにカメラの回転
-	//	Ｘ軸：基本の見下ろし角度にプレイヤーの上下の向きを少し加える
-	m_rot.x = CAMERA_BASE_ROT_X + target_rot.x * CAMERA_ROT_X_RATE;
+	//	Ｘ軸：上下の向きは変えずに、いつも同じ角度で少し見下ろす
+	m_rot.x = CAMERA_BASE_ROT_X;
 	//	Ｙ軸：プレイヤーと同じ方向を向く
 	m_rot.y = target_rot.y;
 	//	Ｚ軸：プレイヤーの傾きを少し小さくして逆方向に
