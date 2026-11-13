@@ -41,7 +41,8 @@ void GameUpdate()
 	//	プレイヤーの更新処理（左右キーで回転・Ｚ軸回転も）
 	player.Update();
 
-	camera.Update();
+	//	カメラの更新処理（プレイヤーの座標と向きを渡してプレイヤーの後ろに）
+	camera.Update( player.m_pos, player.m_rot );
 }
 //---------------------------------------------------------------------------------
 //	描画処理
@@ -55,6 +56,7 @@ void GameRender()
 	player.Render();
 
 	DrawString( 16, 16, "左右キー：プレイヤーの回転", GetColor( 255, 255, 255 ) );
+	DrawString( 16, 64, "上下キー：プレイヤーの上下回転と移動", GetColor( 255, 255, 255 ) );
 	DrawString( 16, 32, "カメラをプレイヤーの後ろに", GetColor( 255, 255, 0 ) );
 	DrawString( 16, 48, "→　プレイヤーのＺ軸の傾きに合わせるようにカメラの回転", GetColor( 255, 255, 0 ) );
 }

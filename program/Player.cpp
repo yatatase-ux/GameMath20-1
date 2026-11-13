@@ -7,6 +7,11 @@
 #define PLAYER_MOV_SPEED	0.1f
 //	プレイヤーの回転スピード
 #define PLAYER_ROT_SPEED	1.0f
+//	プレイヤーの上下回転の範囲
+#define PLAYER_ROT_X_MAX	30.0f
+//	プレイヤーの高さの範囲
+#define PLAYER_POS_Y_MIN	1.0f
+#define PLAYER_POS_Y_MAX	3.0f
 
 //---------------------------------------------------------------------------------
 //	初期化処理
@@ -45,19 +50,39 @@ void Player::Update()
 	//	Ｚ軸の回転角度を -30.0f ～ 30.0f にします
 	m_rot.z = clamp( m_rot.z, -30.0f, 30.0f );
 
+	//	発展課題：上下キーで上下の向きの変更
+	//	（ＤＸライブラリのＸ軸回転はプラスで下向きになるので、上はマイナス）
+	if( CheckHitKey( KEY_INPUT_UP ) && m_pos.y < PLAYER_POS_Y_MAX ){
+		//	上キーを押している時（まだ上に行ける時）は上を向かせる
+		m_rot.x -= PLAYER_ROT_SPEED;
+	}else if( CheckHitKey( KEY_INPUT_DOWN ) && m_pos.y > PLAYER_POS_Y_MIN ){
+		//	下キーを押している時（まだ下に行ける時）は下を向かせる
+		m_rot.x += PLAYER_ROT_SPEED;
+	}else{
+		//	キーを離した時や範囲まで行った時はＸ軸の角度を 0.0f に近づける
+		m_rot.x *= 0.9f;
+	}
+	//	Ｘ軸の回転角度を -30.0f ～ 30.0f にします
+	m_rot.x = clamp( m_rot.x, -PLAYER_ROT_X_MAX, PLAYER_ROT_X_MAX );
+
 	//	それぞれの軸の回転角度が決まったのでそれに合わせた回転行列を作成
 	//	Ｙ軸の回転行列
 	MATRIX mat_y = MGetRotY( TO_RADIAN( m_rot.y ) );
+	//	Ｘ軸の回転行列
+	MATRIX mat_x = MGetRotX( TO_RADIAN( m_rot.x ) );
 	//	Ｚ軸の回転行列
 	MATRIX mat_z = MGetRotZ( TO_RADIAN( m_rot.z ) );
-	//	この２つの行列を１個にします
-	m_mat = MMult( mat_z, mat_y );
+	//	この３つの行列を１個にします（Ｚ軸 → Ｘ軸 → Ｙ軸の順番で回転）
+	m_mat = MMult( MMult( mat_z, mat_x ), mat_y );
 
 	//	向いている方向に移動（常に移動し続ける）
 	Float3 base( 0.0f, 0.0f, PLAYER_MOV_SPEED );		//	基準のベクトル（回転していない時の移動ベクトル）
 //	MATRIX mat = MGetRotY( TO_RADIAN( m_rot.y ) );		//	Ｙ軸回転行列
 	Float3 mov = GetFloat3VTransform( base, m_mat );	//	変換したベクトルを移動ベクトルとして
 	m_pos += mov;										//	座標移動
+
+	//	高さを 1.0f ～ 3.0f の範囲にします
+	m_pos.y = clamp( m_pos.y, PLAYER_POS_Y_MIN, PLAYER_POS_Y_MAX );
 }
 //---------------------------------------------------------------------------------
 //	描画処理
